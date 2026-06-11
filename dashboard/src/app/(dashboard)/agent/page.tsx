@@ -15,7 +15,12 @@ export default function AgentActivity() {
   const { walletConnected, walletAddress, connecting, connectWallet } = useWallet()
   const isDeployer = walletConnected
 
-  const [status, setStatus] = useState<'ACTIVE' | 'STOPPED' | 'ERROR'>('ACTIVE')
+  const [status, setStatus] = useState<'ACTIVE' | 'STOPPED' | 'ERROR'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('seye_agent_status') as any) || 'ACTIVE'
+    }
+    return 'ACTIVE'
+  })
   const [logs, setLogs] = useState<AgentLog[]>([])
   const [uptime, setUptime] = useState(0)
   const [totalTrades, setTotalTrades] = useState(0)
@@ -32,7 +37,13 @@ export default function AgentActivity() {
 
       try {
         const agentStatus = await fetchAgentStatus(walletAddress)
-        setStatus(agentStatus.state || 'ACTIVE')
+        const localStatus = localStorage.getItem('seye_agent_status')
+        if (localStatus) {
+          setStatus(localStatus as any)
+        } else {
+          setStatus(agentStatus.state || 'ACTIVE')
+          localStorage.setItem('seye_agent_status', agentStatus.state || 'ACTIVE')
+        }
         setUptime(agentStatus.uptime_seconds || 43200)
         setLastAction(agentStatus.last_action || 'Scanned Mantle block 58349281.')
       } catch (err) {
@@ -149,13 +160,17 @@ export default function AgentActivity() {
 
     if (status === 'ACTIVE') {
       try {
+        localStorage.setItem('seye_agent_status', 'STOPPED')
+        setStatus('STOPPED')
+        
         const res = await stopAgent(walletAddress)
         if (res.success === false) {
           alert(res.message || 'Failed to stop agent.')
+          localStorage.setItem('seye_agent_status', 'ACTIVE')
+          setStatus('ACTIVE')
           setIsCommanding(false)
           return
         }
-        setStatus('STOPPED')
         setLogs((prev) => [
           ...prev,
           { timestamp: logTime, message: 'SIGINT received. Shutting down execution engines...', type: 'warn' },
@@ -166,13 +181,18 @@ export default function AgentActivity() {
       }
     } else {
       try {
+        localStorage.setItem('seye_agent_status', 'ACTIVE')
+        setStatus('ACTIVE')
+        localStorage.setItem('seye_agent_start_time', Date.now().toString())
+        
         const res = await startAgent(walletAddress)
         if (res.success === false) {
           alert(res.message || 'Failed to start agent.')
+          localStorage.setItem('seye_agent_status', 'STOPPED')
+          setStatus('STOPPED')
           setIsCommanding(false)
           return
         }
-        setStatus('ACTIVE')
         setLogs((prev) => [
           ...prev,
           { timestamp: logTime, message: 'SIGSTART received. Initializing trading parameters...', type: 'info' },
