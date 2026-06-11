@@ -17,10 +17,10 @@ export default function AgentActivity() {
 
   const [status, setStatus] = useState<'ACTIVE' | 'STOPPED' | 'ERROR'>('ACTIVE')
   const [logs, setLogs] = useState<AgentLog[]>([])
-  const [uptime, setUptime] = useState(43200)
-  const [totalTrades, setTotalTrades] = useState(148)
-  const [winRate, setWinRate] = useState(76.2)
-  const [lastAction, setLastAction] = useState('Scanned Mantle block 58349281.')
+  const [uptime, setUptime] = useState(0)
+  const [totalTrades, setTotalTrades] = useState(0)
+  const [winRate, setWinRate] = useState(0)
+  const [lastAction, setLastAction] = useState('—')
   const { isEducationMode } = useEducationMode()
   
   const [isCommanding, setIsCommanding] = useState(false)
@@ -264,7 +264,7 @@ export default function AgentActivity() {
             <div className="flex flex-col">
               <span className="text-[9px] text-text-muted">AGENT UPTIME</span>
               <span className="text-sm font-bold tabular-nums text-text-primary mt-1">
-                {formatUptime(uptime)}
+                {walletConnected ? formatUptime(uptime) : '—'}
               </span>
             </div>
             <Clock className="h-5 w-5 text-text-muted/60" />
@@ -275,7 +275,7 @@ export default function AgentActivity() {
             <div className="flex flex-col">
               <span className="text-[9px] text-text-muted">TOTAL EXECUTED TRADES</span>
               <span className="text-sm font-bold tabular-nums text-text-primary mt-1">
-                {totalTrades}
+                {walletConnected ? totalTrades : '—'}
               </span>
             </div>
             <Cpu className="h-5 w-5 text-text-muted/60" />
@@ -286,7 +286,7 @@ export default function AgentActivity() {
             <div className="flex flex-col">
               <span className="text-[9px] text-text-muted">STRATEGY SUCCESS RATE</span>
               <span className="text-sm font-bold tabular-nums text-accent-green mt-1">
-                {winRate}%
+                {walletConnected ? `${winRate}%` : '—'}
               </span>
             </div>
             <ShieldCheck className="h-5 w-5 text-accent-green/60" />
@@ -296,8 +296,8 @@ export default function AgentActivity() {
           <div className="border border-white/5 bg-[#0c0c0e] p-4 flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[9px] text-text-muted">LAST PIPELINE ACTION</span>
-              <span className="text-[10px] font-bold text-text-primary truncate max-w-[150px] mt-1.5" title={lastAction}>
-                {lastAction}
+              <span className="text-[10px] font-bold text-text-primary truncate max-w-[150px] mt-1.5" title={walletConnected ? lastAction : '—'}>
+                {walletConnected ? lastAction : '—'}
               </span>
             </div>
             <Clock className="h-5 w-5 text-text-muted/60" />
