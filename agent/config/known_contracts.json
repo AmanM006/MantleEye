@@ -1,0 +1,10 @@
+{
+  "network": "mantleSepolia",
+  "contracts": {
+    "mETH": "0xcDA86FAdE79ff6eF95D3430B95bc99a5e8e81566",
+    "cmETH": "0x3541A703F8087263b652877DEf025fBfD376829A",
+    "MerchantMoeRouter": "0x534D7E24ab4C0a0A07b539deCD34D93f960336ae",
+    "AgniFinanceRouter": "0xc19bC7465cf881096c90ED0c8f3ED34D93f9603c",
+    "USDY": "0x12a34567890abcdef1234567890abcdef1234567"
+  }
+}

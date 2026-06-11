@@ -1,0 +1,26 @@
+{
+  "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa": {
+    "strategy_type": "MOMENTUM",
+    "max_position_usd": 5000,
+    "stop_loss_pct": 3.5,
+    "take_profit_pct": 12,
+    "max_open_positions": 3,
+    "cooldown_seconds": 300
+  },
+  "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {
+    "strategy_type": "MOMENTUM",
+    "max_position_usd": 1000,
+    "stop_loss_pct": 3.5,
+    "take_profit_pct": 12,
+    "max_open_positions": 3,
+    "cooldown_seconds": 300
+  },
+  "0x9d744f795faa53e3173baf18783baf51b92b98a5": {
+    "strategy_type": "MOMENTUM",
+    "max_position_usd": 1000,
+    "stop_loss_pct": 3.5,
+    "take_profit_pct": 12,
+    "max_open_positions": 3,
+    "cooldown_seconds": 300
+  }
+}

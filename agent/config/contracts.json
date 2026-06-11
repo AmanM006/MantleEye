@@ -1,0 +1,8 @@
+{
+  "network": "mantleSepolia",
+  "chainId": 5003,
+  "contracts": {
+    "TradeLogger": "0x06Dd85bcCA6B85Fc19cC32Dde26A07BC18E022a1",
+    "SignalAnchor": "0x59da1E9D3A52da6716569442d643A963148829Aa"
+  }
+}

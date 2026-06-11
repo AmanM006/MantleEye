@@ -1,0 +1,617 @@
+@import url("/webflow.min.css");
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+
+@font-face {
+  font-family: 'Khteka';
+  src: url('/fonts/KHTeka-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Animo';
+  src: url('/fonts/Animo-Normal_Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-space-mono: 'Space Mono', monospace;
+  --font-khteka: 'Khteka', 'Plus Jakarta Sans', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: #000000;
+    color: #F0F0F0;
+    font-family: var(--font-plus-jakarta);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-plus-jakarta);
+  }
+}
+
+/* Global border-radius override to retain clean minimalist sharp corners */
+* {
+  border-radius: 0px !important;
+}
+
+/* Custom transitions to make interactions super smooth — exclude animated page wrappers */
+*:not(.page-fade-in) {
+  transition-property: background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Page entrance fade animation */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade-in {
+  animation: page-fade-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Custom scrollbar styling (Luxury minimalist) */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2563eb;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3b82f6;
+}
+
+/* Monospace Numbers Tabular Figures */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-space-mono);
+}
+
+/* --- High-End Animations --- */
+
+/* Flash green for positive value updates */
+@keyframes flashGreen {
+  0% {
+    background-color: rgba(0, 255, 135, 0.25);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+.flash-green {
+  animation: flashGreen 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Flash red for negative value updates */
+@keyframes flashRed {
+  0% {
+    background-color: rgba(255, 59, 92, 0.25);
+  }
+
+  100% {
+    background-color: transparent;
+  }
+}
+
+.flash-red {
+  animation: flashRed 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Pulse green for active system status */
+@keyframes pulseActive {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px #00FF87;
+  }
+
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 1px #00FF87;
+  }
+}
+
+.pulse-active {
+  animation: pulseActive 2s infinite ease-in-out;
+  background-color: #00FF87;
+}
+
+/* Pulse red for error status */
+@keyframes pulseError {
+
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 6px #FF3B5C;
+  }
+
+  50% {
+    opacity: 0.5;
+    box-shadow: 0 0 1px #FF3B5C;
+  }
+}
+
+.pulse-error {
+  animation: pulseError 2s infinite ease-in-out;
+  background-color: #FF3B5C;
+}
+
+/* Scrolling ticker animation */
+@keyframes tickerScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.scrolling-ticker {
+  display: flex;
+  width: max-content;
+  animation: tickerScroll 28s linear infinite;
+}
+
+.scrolling-ticker:hover {
+  animation-play-state: paused;
+}
+
+/* Blinking terminal cursor */
+@keyframes blinkCursor {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.terminal-cursor::after {
+  content: '▋';
+  color: #00FF87;
+  animation: blinkCursor 1s infinite;
+  margin-left: 2px;
+}
+
+/* Soft glow for critical threat alerts */
+@keyframes criticalGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(255, 59, 92, 0.15);
+    border-color: rgba(255, 59, 92, 0.4);
+  }
+
+  50% {
+    box-shadow: none;
+    border-color: rgba(255, 59, 92, 0.1);
+  }
+}
+
+.critical-glow {
+  animation: criticalGlow 2s infinite ease-in-out;
+}
+
+/* Moving beam keyframe for Section 2 Architecture flow */
+@keyframes flowBeam {
+  0% {
+    left: -50px;
+  }
+
+  100% {
+    left: calc(100% + 50px);
+  }
+}
+
+.flow-beam {
+  position: absolute;
+  height: 2px;
+  width: 40px;
+  background: linear-gradient(90deg, transparent, #ff5005, transparent);
+  animation: flowBeam 3s linear infinite;
+}
+
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* --- Lenis Smooth Scroll Core Styles (landing page only) --- */
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* --- MONOLOG Button & Sound Icon Styles --- */
+.monolog-btn {
+  display: inline-flex;
+  align-items: center;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: var(--font-plus-jakarta);
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding-left: 20px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ffffff;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.monolog-btn-text-wrapper {
+  overflow: hidden;
+  height: 1.2em;
+  position: relative;
+}
+
+.monolog-btn-text {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.monolog-btn-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+}
+
+.monolog-btn-arrow-box {
+  background-color: #000000;
+  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.monolog-btn-arrow {
+  font-size: 14px;
+  font-weight: bold;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.monolog-btn-arrow.is-absolute {
+  position: absolute;
+  transform: translate(-100%, 100%);
+}
+
+.monolog-btn:hover {
+  opacity: 0.95;
+}
+
+.monolog-btn:hover .monolog-btn-text {
+  transform: translateY(-100%);
+}
+
+.monolog-btn:hover .monolog-btn-arrow {
+  transform: translate(100%, -100%);
+}
+
+.monolog-btn:hover .monolog-btn-arrow.is-absolute {
+  transform: translate(0, 0);
+}
+
+.monolog-sound-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.monolog-sound-btn:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Custom nav link hover effect matching MONOLOG */
+.navbar-link-custom {
+  position: relative;
+  font-family: var(--font-khteka);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.015em;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 8px 14px;
+  transition: color 0.25s ease;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.navbar-link-custom::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-color: rgba(255, 0, 0, 0.12);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.navbar-link-custom:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.navbar-link-custom:hover {
+  color: #ffffff;
+}
+
+/* --- MONOLOG Deconstructed Button Styles --- */
+.navbar_cta_contain {
+  display: flex;
+  align-items: center;
+}
+
+.g_btn_main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  color: #080807;
+  font-family: var(--font-khteka);
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding-left: 20px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-right: 4px;
+  height: 40px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #ffffff;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  width: fit-content;
+}
+
+.g_btn_text_contain {
+  overflow: hidden;
+  height: 1.2em;
+  position: relative;
+}
+
+.g_btn_text {
+  display: block;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  text-shadow: 0px 1.2em 0px #080807;
+}
+
+.g_btn_aside_wrap {
+  background-color: #080807;
+  aspect-ratio: 1;
+  width: 32px;
+  height: 32px;
+  margin-left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.g_btn_aside_bg {
+  position: absolute;
+  inset: 0;
+  background-color: #080807;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.35, 1);
+}
+
+.g_btn_svg {
+  z-index: 1;
+  width: 12px;
+  height: 12px;
+  color: #ffffff;
+  position: relative;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.35, 1);
+}
+
+
+
+.g_btn_svg.is-absolute {
+  position: absolute;
+  transform: translate(-220%, 220%);
+}
+
+/* Hover effects */
+.g_btn_main:hover {
+  opacity: 0.95;
+}
+
+.g_btn_main:hover .g_btn_text {
+  transform: translateY(-1.2em);
+}
+
+.g_btn_main:hover .g_btn_svg {
+  transform: translate(220%, -220%);
+}
+
+.g_btn_main:hover .g_btn_svg.is-absolute {
+  transform: translate(0, 0);
+}
+
+.g_btn_main:hover .g_btn_aside_bg {
+  transform: scale(0.8);
+}
+
+/* ---- CTA big button (larger variant) ---- */
+.g_btn_main.is-large {
+  height: 52px;
+  padding-left: 28px;
+  font-size: 11px;
+}
+.g_btn_main.is-large .g_btn_aside_wrap {
+  width: 40px;
+  height: 40px;
+}
+
+/* ---- Webflow class compatibility overrides ---- */
+/* These prevent the webflow.min.css from fighting Tailwind */
+.w-inline-block {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* u-text-style typography classes (from Webflow) — set sane defaults */
+.u-text-style-display {
+  font-family: var(--font-khteka), Arial, sans-serif;
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+.u-text-style-h1 {
+  font-family: var(--font-khteka), Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.u-text-style-h2 {
+  font-family: var(--font-khteka), Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.u-text-style-h3 {
+  font-family: var(--font-khteka), Arial, sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+.u-text-style-h5 {
+  font-family: var(--font-plus-jakarta), Arial, sans-serif;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  font-weight: 400;
+}
+.u-text-style-main {
+  font-family: var(--font-plus-jakarta), Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.u-text-style-small {
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+.u-text-style-large {
+  font-size: 1.125rem;
+  line-height: 1.3;
+}
+.u-text-mono {
+  font-family: var(--font-space-mono), monospace;
+  font-size: 0.75rem;
+}
+.u-text-style-xsmall {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.u-text-trim-off {
+  white-space: nowrap;
+}
+.u-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ---- Eyebrow component ---- */
+.g_eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.g_eyebrow_circle {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.g_eyebrow_text {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* ---- Section transitions ---- */
+section {
+  position: relative;
+}
+
+/* ---- Navbar link hover override — use white glow not red ---- */
+.navbar-link-custom::before {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ---- Prevent Webflow CSS from resetting our custom scroll ---- */
+html.lenis body {
+  background-color: #000000 !important;
+}
+
+/* ---- Ensure font-khteka Tailwind class works ---- */
+.font-khteka {
+  font-family: var(--font-khteka), 'Plus Jakarta Sans', Arial, sans-serif !important;
+}

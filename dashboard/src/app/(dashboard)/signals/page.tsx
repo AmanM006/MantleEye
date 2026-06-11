@@ -1,0 +1,301 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { fetchSignals } from '@/lib/api'
+import { Signal } from '@/lib/mock-data'
+import { getSignalColor, formatTimestamp, formatAddress } from '@/lib/utils'
+import { useWallet } from '@/context/WalletContext'
+import { ExternalLink, Filter, Download, ArrowUpDown, Lock } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { useEducationMode } from '@/context/EducationContext'
+
+export default function AlphaSignals() {
+  const { walletConnected, walletAddress, connecting, connectWallet } = useWallet()
+  const isDeployer = walletConnected
+
+  const [signals, setSignals] = useState<Signal[]>([])
+  const [loading, setLoading] = useState(true)
+  const { isEducationMode } = useEducationMode()
+  
+  // Filters state
+  const [assetFilter, setAssetFilter] = useState('ALL')
+  const [typeFilter, setTypeFilter] = useState('ALL')
+  const [minConfidence, setMinConfidence] = useState(0.5)
+  const [sortField, setSortField] = useState<'created_at' | 'confidence'>('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+
+  useEffect(() => {
+    async function loadData() {
+      if (!walletConnected || !isDeployer) {
+        setSignals([])
+        setLoading(false)
+        return
+      }
+      setLoading(true)
+      try {
+        const data = await fetchSignals({ walletAddress })
+        setSignals(Array.isArray(data?.signals) ? data.signals : [])
+      } catch (err) {
+        console.error('Failed to load signals:', err)
+        setSignals([])
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadData()
+  }, [walletConnected, isDeployer, walletAddress])
+
+  // Filter & Sort Logic
+  const filteredSignals = (signals || [])
+    .filter((sig) => {
+      const matchAsset = assetFilter === 'ALL' || sig.asset.includes(assetFilter)
+      const matchType = typeFilter === 'ALL' || sig.signal_type === typeFilter
+      const matchConf = sig.confidence >= minConfidence
+      return matchAsset && matchType && matchConf
+    })
+    .sort((a, b) => {
+      let comparison = 0
+      if (sortField === 'created_at') {
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      } else {
+        comparison = a.confidence - b.confidence
+      }
+      return sortDirection === 'desc' ? -comparison : comparison
+    })
+
+  const uniqueAssets = ['ALL', ...Array.from(new Set(signals.map((s) => s.asset.split('/')[0])))]
+
+  const toggleSort = (field: 'created_at' | 'confidence') => {
+    if (sortField === field) {
+      setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortField(field)
+      setSortDirection('desc')
+    }
+  }
+
+  const exportCSV = () => {
+    const headers = 'ID,Timestamp,Asset,Direction,Confidence,Price,Reasoning,TxHash\n'
+    const rows = filteredSignals.map(s => 
+      `"${s.id}","${s.created_at}","${s.asset}","${s.signal_type}",${s.confidence},${s.price_at_signal},"${s.reasoning.replace(/"/g, '""')}","${s.tx_hash || ''}"`
+    ).join('\n')
+    
+    const blob = new Blob([headers + rows], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.setAttribute('download', `mantleye_signals_${Date.now()}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  return (
+    <div className="flex-1 flex flex-col p-6 space-y-6 overflow-hidden min-h-0 bg-transparent font-mono select-none text-white font-sans">
+      {/* Title */}
+      <div className="flex justify-between items-center bg-[#0c0c0e] border border-white/5 p-4">
+        <div>
+          <h1 className="text-sm font-bold tracking-wider text-text-primary font-khteka">👁️ ANOMALY SIGNAL HISTORY</h1>
+          <p className="text-[10px] text-text-muted mt-1 uppercase tracking-wider">
+            QUANTITATIVE SIGNAL ARCHIVE
+          </p>
+        </div>
+        <button
+          onClick={exportCSV}
+          disabled={!walletConnected || !isDeployer}
+          className="flex items-center space-x-2 px-3 py-1.5 border border-border text-[10px] text-accent-teal hover:bg-elevated/40 hover:border-accent-teal/50 transition-colors disabled:opacity-50"
+        >
+          <Download className="h-3 w-3" />
+          <span>EXPORT CSV</span>
+        </button>
+      </div>
+
+      {/* Beginner Guide Mode Banner */}
+      {isEducationMode && (
+        <div className="shrink-0 border border-[#00d4a4]/30 bg-[#00d4a4]/5 p-4 font-sans space-y-2">
+          <div className="text-[10px] font-extrabold text-[#00d4a4] tracking-wider uppercase flex items-center space-x-1.5 font-khteka">
+            <span>💡 ANOMALY SIGNAL ARCHIVE GUIDE</span>
+          </div>
+          <div className="text-[10px] text-neutral-400 leading-relaxed uppercase">
+            <p>Every row represents a cryptographic proof generated by the Claude sentinel. The reasoning details are committed on-chain BEFORE execution and revealed afterwards, guaranteeing absolute transparency.</p>
+            <p className="mt-1">
+              • <strong className="text-white">TIMESTAMP</strong>: The exact block time the signal hash was anchored. <br />
+              • <strong className="text-white">ON-CHAIN PROOF</strong>: Click the link to verify the transaction details on Mantlescan explorer.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Dynamic Signals Panel Wrapper */}
+      <div className="relative flex-1 flex flex-col min-h-0 space-y-6">
+        {!walletConnected && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-[#0c0c0e]/95 backdrop-blur-[2px] gap-3">
+            <div className="border border-white/10 p-3 bg-white/5">
+              <Lock className="h-5 w-5 text-white/30" />
+            </div>
+            <p className="text-[10px] text-white/30 font-mono uppercase tracking-widest text-center px-4">Connect wallet to view anomaly signal history</p>
+            <button
+              onClick={connectWallet}
+              disabled={connecting}
+              className="mt-1 px-4 py-2 bg-[#00d4a4] text-black text-[10px] font-bold tracking-widest uppercase hover:bg-[#00b891] transition-colors disabled:opacity-50"
+            >
+              {connecting ? 'CONNECTING...' : 'CONNECT WALLET'}
+            </button>
+          </div>
+        )}
+
+        {/* Filter Toolbar */}
+        <div className="grid grid-cols-4 gap-4 p-4 bg-[#0c0c0e] border border-white/5">
+          {/* Asset Filter */}
+          <div className="flex flex-col space-y-1">
+            <label className="text-[9px] text-text-muted">ASSET TICKER</label>
+            <select
+              value={assetFilter}
+              onChange={(e) => setAssetFilter(e.target.value)}
+              className="bg-primary border border-border p-1.5 text-xs text-text-primary outline-none focus:border-accent-teal"
+            >
+              {uniqueAssets.map((asset) => (
+                <option key={asset} value={asset}>
+                  {asset}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Type Filter */}
+          <div className="flex flex-col space-y-1">
+            <label className="text-[9px] text-text-muted">SIGNAL DIRECTION</label>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="bg-primary border border-border p-1.5 text-xs text-text-primary outline-none focus:border-accent-teal"
+            >
+              <option value="ALL">ALL DIRECTIONS</option>
+              <option value="BUY">BUY / LONG</option>
+              <option value="SELL">SELL / SHORT</option>
+              <option value="WATCH">WATCH</option>
+            </select>
+          </div>
+
+          {/* Confidence Threshold */}
+          <div className="flex flex-col space-y-1 col-span-2">
+            <div className="flex justify-between text-[9px] text-text-muted">
+              <span>MIN CONFIDENCE THRESHOLD</span>
+              <span className="font-bold text-accent-teal">{(minConfidence * 100).toFixed(0)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0.50"
+              max="0.99"
+              step="0.01"
+              value={minConfidence}
+              onChange={(e) => setMinConfidence(parseFloat(e.target.value))}
+              className="w-full bg-primary border border-border appearance-none h-1 mt-3 cursor-pointer accent-accent-teal"
+            />
+          </div>
+        </div>
+
+        {/* Data Table */}
+        <div className="flex-1 border border-white/5 bg-[#0c0c0e] overflow-hidden flex flex-col">
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="h-full flex items-center justify-center text-xs text-text-muted">
+                RETRIEVING INTEL ARCHIVE...
+              </div>
+            ) : filteredSignals.length === 0 ? (
+              <div className="h-full flex items-center justify-center text-xs text-text-muted">
+                {walletConnected && !isDeployer 
+                  ? "NO AUTHORIZED SIGNAL HISTORY FOR THIS WALLET ADDRESS" 
+                  : "NO MATCHING SIGNALS IN DATA STORE"}
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse text-xs">
+                <thead className="bg-[#050508]/85 border-b border-white/5 sticky top-0 font-mono text-[10px] text-text-muted">
+                  <tr>
+                    <th 
+                      onClick={() => toggleSort('created_at')}
+                      className="p-3 border-r border-border cursor-pointer hover:bg-elevated hover:text-text-primary"
+                    >
+                      <div className="flex items-center space-x-1.5">
+                        <span>TIMESTAMP</span>
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th className="p-3 border-r border-border">ASSET</th>
+                    <th className="p-3 border-r border-border">TYPE</th>
+                    <th 
+                      onClick={() => toggleSort('confidence')}
+                      className="p-3 border-r border-border cursor-pointer hover:bg-elevated hover:text-text-primary"
+                    >
+                      <div className="flex items-center space-x-1.5">
+                        <span>CONFIDENCE</span>
+                        <ArrowUpDown className="h-3 w-3" />
+                      </div>
+                    </th>
+                    <th className="p-3 border-r border-border">PRICE AT TRIGGER</th>
+                    <th className="p-3 border-r border-border w-[40%]">REASONING SUMMARY</th>
+                    <th className="p-3">ON-CHAIN PROOF</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {filteredSignals.map((sig, idx) => {
+                    const colors = getSignalColor(sig.signal_type)
+                    return (
+                      <tr 
+                        key={sig.id}
+                        className={cn(
+                          "hover:bg-white/[0.04] transition-colors",
+                          idx % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.01]'
+                        )}
+                      >
+                        <td className="p-3 border-r border-border tabular-nums text-text-primary/70">
+                          {formatTimestamp(sig.created_at)}
+                        </td>
+                        <td className="p-3 border-r border-border font-bold text-text-primary">
+                          {sig.asset}
+                        </td>
+                        <td className="p-3 border-r border-border">
+                          <span className={cn(
+                            "px-2 py-[1px] text-[9px] font-bold border",
+                            colors.text,
+                            colors.bg,
+                            colors.border
+                          )}>
+                            {sig.signal_type}
+                          </span>
+                        </td>
+                        <td className="p-3 border-r border-border tabular-nums font-bold text-text-primary">
+                          {(sig.confidence * 100).toFixed(0)}%
+                        </td>
+                        <td className="p-3 border-r border-border tabular-nums text-text-primary/80">
+                          ${sig.price_at_signal.toFixed(4)}
+                        </td>
+                        <td className="p-3 border-r border-border text-text-primary/70 leading-relaxed">
+                          {sig.reasoning}
+                        </td>
+                        <td className="p-3">
+                          {sig.tx_hash ? (
+                            <a
+                              href={`https://sepolia.mantlescan.xyz/tx/${sig.tx_hash}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="flex items-center space-x-1.5 text-accent-teal hover:underline"
+                            >
+                              <span>{formatAddress(sig.tx_hash)}</span>
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ) : (
+                            <span className="text-text-muted">UNANCHORED</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

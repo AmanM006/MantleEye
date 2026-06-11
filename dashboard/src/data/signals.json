@@ -1,0 +1,47 @@
+[
+  {
+    "commitHash": "0xbd3b53642628afcc661d45e9d3def096010c4ae45a63ed389f0226bf66a72584",
+    "signalType": "depeg",
+    "confidence": 91,
+    "reasoning": "mETH/cmETH peg deviation detected at 0.58%. Executing arbitrage rebalance.",
+    "tradeIntent": "SWAP mETH FOR cmETH ON MERCHANT MOE",
+    "nonce": "12345",
+    "timestamp": 1780927960,
+    "commitTx": "0xe1747ebb95b19b51ef1ebb90e940ac761fd60e39c9d5d5123864fe80f025fbfd",
+    "revealTx": "0x8f7868e5160c319d967583e0acd8abe614ab76da4880b67f3d7b20785f9dd9b3",
+    "onChainTx": "0xd1f8f80a77a130cff02a6e1fe19155acc73f138783709c155999e2d34dfbe55b",
+    "bybitOrderId": "bybit_order_12345",
+    "nansenLabel": "Nansen: Tier-1 Fund (Signer)",
+    "status": "revealed"
+  },
+  {
+    "commitHash": "0x0d8d055e12848ce8e0631a27e2471a1721e0809e7be705cd13131510ebc54247",
+    "signalType": "whaleExit",
+    "confidence": 85,
+    "reasoning": "Merchant Moe concentrated pool large withdrawal detected. Whale exit from USDC/MNT.",
+    "tradeIntent": "SHORT HEDGE MNTUSDT BYBIT",
+    "nonce": "67890",
+    "timestamp": 1780927360,
+    "commitTx": "0x2e6de9b5a3ec4a0076fff3cc11a7a8f6177996e1d373636ef86a0fba2c649d0b",
+    "revealTx": "0x9ab48d511acd528326dc305dddbe2841c951765b586db2bd46e37d79568bcdee",
+    "onChainTx": "0x76626c14c79f7dd1ec75e4f47048c47548bb078216298a50fd48c469cc8687e2",
+    "bybitOrderId": "bybit_order_67890",
+    "nansenLabel": "Nansen: Smart Money LP",
+    "status": "revealed"
+  },
+  {
+    "commitHash": "0x05519bbcd5f1e1d558ebeca3b5e531e1cb630f8b3e8b5a3566fdcec3f8c19880",
+    "signalType": "accumulation",
+    "confidence": 88,
+    "reasoning": "USDY Ondo RWA depeg deviation detected at 0.35%. Accumulating USDY on-chain.",
+    "tradeIntent": "BUY USDY ON MERCHANT MOE",
+    "nonce": "55555",
+    "timestamp": 1780926460,
+    "commitTx": "0x3395f59116bf644b9ebe0a4a21e868de5d5e10e907246801a7abf6180f1c5be3",
+    "revealTx": "0x64a16125e6454dbc7b47a042b21376ececbba8766a8a16d491196c7aa054eb5b",
+    "onChainTx": "0xmockdex2...",
+    "bybitOrderId": "bybit_order_55555",
+    "nansenLabel": "Nansen: Active Whale",
+    "status": "revealed"
+  }
+]
