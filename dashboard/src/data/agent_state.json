@@ -1,7 +1,7 @@
 {
   "0x9d744f795faa53e3173baf18783baf51b92b98a5": {
     "state": "ACTIVE",
-    "uptime_seconds": 43200,
+    "started_at": "2026-06-11T17:00:00.000Z",
     "last_action": "Scanned Mantle block 58349281. Executed order fill.",
     "last_action_at": "2026-06-08T21:15:26.792Z",
     "open_positions": 2,
@@ -13,7 +13,7 @@
   },
   "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb": {
     "state": "ACTIVE",
-    "uptime_seconds": 43200,
+    "started_at": "2026-06-11T17:00:00.000Z",
     "last_action": "SIGSTART received. Initializing trading parameters...",
     "last_action_at": "2026-06-11T22:52:37.415Z",
     "open_positions": 2,

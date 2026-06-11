@@ -6,7 +6,7 @@ const stateJsonPath = path.join(process.cwd(), 'src', 'data', 'agent_state.json'
 
 const DEFAULT_STATE = {
   state: 'ACTIVE',
-  uptime_seconds: 43200,
+  started_at: new Date(Date.now() - 43200 * 1000).toISOString(),
   last_action: 'Scanned Mantle block 58349281. Executed order fill.',
   last_action_at: new Date().toISOString(),
   open_positions: 2

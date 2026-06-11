@@ -6,7 +6,7 @@ const stateJsonPath = path.join(process.cwd(), 'src', 'data', 'agent_state.json'
 
 const DEFAULT_STATE = {
   state: 'ACTIVE',
-  uptime_seconds: 43200,
+  started_at: new Date(Date.now() - 43200 * 1000).toISOString(), // 12 hours ago
   last_action: 'Scanned Mantle block 58349281. Executed order fill.',
   last_action_at: new Date().toISOString(),
   open_positions: 2
@@ -32,12 +32,25 @@ export async function GET(req: NextRequest) {
     if (!allStates[walletKey]) {
       allStates[walletKey] = { 
         ...DEFAULT_STATE, 
+        started_at: new Date(Date.now() - 43200 * 1000).toISOString(),
         last_action_at: new Date().toISOString() 
       }
       fs.writeFileSync(stateJsonPath, JSON.stringify(allStates, null, 2))
+    } else if (!allStates[walletKey].started_at) {
+      // Migrate old state file structure
+      allStates[walletKey].started_at = new Date(Date.now() - (allStates[walletKey].uptime_seconds || 43200) * 1000).toISOString()
+      delete allStates[walletKey].uptime_seconds
+      fs.writeFileSync(stateJsonPath, JSON.stringify(allStates, null, 2))
     }
 
-    return NextResponse.json(allStates[walletKey])
+    // Dynamic uptime calculation
+    const startedAtMs = new Date(allStates[walletKey].started_at).getTime()
+    const uptime_seconds = Math.floor((Date.now() - startedAtMs) / 1000)
+
+    return NextResponse.json({
+      ...allStates[walletKey],
+      uptime_seconds
+    })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
