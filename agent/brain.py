@@ -92,7 +92,7 @@ class MantleBrain:
         # 1. Try Gemini if configured
         if self.gemini_key and self.gemini_key != "your_key" and not self.gemini_key.startswith("your_"):
             try:
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={self.gemini_key}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={self.gemini_key}"
                 system_instruction = (
                     "You are a DeFi anomaly classifier. Analyze on-chain events "
                     "and return JSON only matching this schema: "
