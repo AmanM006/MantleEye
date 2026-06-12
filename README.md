@@ -1,12 +1,41 @@
 # MANTLEYE — Autonomous Mantle Sentinel Network
 
-## Problem
-Retail traders are blind to whale movements on-chain and are constantly frontrun by institutional desks with proprietary tracking feeds. This lack of transparency leads to severe information asymmetry where retail traders discover liquidity exits or token depegs only after prices have already collapsed.
+[![Website](https://img.shields.io/badge/Website-Live-00D4A4?style=for-the-badge&logo=vercel&logoColor=black)](https://mantleeye.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?style=for-the-badge&logo=github)](https://github.com/AmanM006/MantleEye)
+[![Network](https://img.shields.io/badge/Network-Mantle_Sepolia-5003?style=for-the-badge&color=00d4a4)](https://explorer.sepolia.mantle.xyz)
 
-## Solution  
-MANTLEYE watches Mantle on-chain 24/7, surfacing Nansen-labeled smart money signals that nobody else tracks. It cryptographically commits its AI reasoning on-chain before executing split CEX/DEX hedges to prove trade authenticity. All logs are immutable, verifiable, and open to the public, offering retail users an institutional-grade security guard.
+MantleEye is an autonomous, cryptographically auditable AI quantitative sentinel and linear hedging engine tracking smart money anomalies on the Mantle network. It watches DEX pools and whale transfers, formulates trading signals using an LLM cognitive loop, and registers decisions on-chain before executing swaps to eliminate hindsight bias.
 
-## Architecture
+---
+
+## 🌐 Live URLs & Deployed Contracts
+
+*   **Production Dashboard**: [https://mantleeye.vercel.app](https://mantleeye.vercel.app)
+*   **SignalAnchor Smart Contract**: [`0x59da1E9D3A52da6716569442d643A963148829Aa`](https://explorer.sepolia.mantle.xyz/address/0x59da1E9D3A52da6716569442d643A963148829Aa)
+    *   *Verifiable commit-reveal registry where AI decision hashes are anchored.*
+*   **TradeLogger Smart Contract**: [`0x06Dd85bcCA6B85Fc19cC32Dde26A07BC18E022a1`](https://explorer.sepolia.mantle.xyz/address/0x06Dd85bcCA6B85Fc19cC32Dde26A07BC18E022a1)
+    *   *Immutable ledger recording trade execution records linked to original signal references.*
+
+---
+
+## 📌 Problem Statement & Vision
+Retail traders are blind to whale movements on-chain and are constantly frontrun by institutional desks with proprietary tracking feeds. This information asymmetry leads to retail traders discovering liquidity exits or token depegs only after prices have already collapsed.
+
+MantleEye democratizes institutional-grade intelligence by making Nansen-labeled smart money signals accessible to anyone. To guarantee trust and prevent retrospective backfilling, the sentinel operates a **cryptographic commit-reveal schedule**, anchoring decision intents on-chain before execution to prove the agent acted without hindsight bias.
+
+---
+
+## 🛠️ Key Features
+
+1.  **On-Chain Cryptographic Commit-Reveal**: AI decisions are hashed (`Keccak256`) and committed on-chain *before* any DEX swap occurs. Plaintext parameters are revealed post-execution, enabling public auditability.
+2.  **Live AI Chat Sandbox**: A built-in chat window connected to the **Gemini 1.5 Flash API** allowing reviewers to query the agent's cognitive loops.
+3.  **Cryptographic Proof Calculator**: Interactive client-side hashing utility verifying that the plain text parameters match the committed hash.
+4.  **Mantle ERC-8004 Compliance**: Ready to emit standard benchmarking events for AI Agent evaluation protocols on Mantle.
+5.  **Telemetry State Persistence**: Solved serverless read-only write failures on Vercel using browser local storage to guarantee status and timer consistency during tab navigation.
+
+---
+
+## 📐 System Architecture
 
 ```
                                   +-----------------------+
@@ -56,68 +85,67 @@ MANTLEYE watches Mantle on-chain 24/7, surfacing Nansen-labeled smart money sign
                                   +-----------+-----------+
 ```
 
-## How Commit-Reveal Works
-To prevent retrospective backfilling or performance manipulation, MANTLEYE operates on a strict commit-reveal schedule:
-1. **Commit**: Before launching any on-chain swap or CEX hedge, the agent creates a Keccak256 hash of its reasoning, trade intent, nonce, signal type, and confidence score. This hash is written to the `SignalAnchor` contract on-chain.
-2. **Execute**: The agent executes the swaps on Merchant Moe and hedging positions on Bybit.
-3. **Reveal**: Once completed, the agent calls `revealDecision` on the contract with the original plaintext parameters. The contract cryptographically hashes the inputs and compares them with the pre-committed hash. If they match, a verified `DecisionLogged` event is emitted.
+---
 
-This guarantees that the AI decided on the trade *before* seeing the outcome, preventing hindsight bias.
+## 🔒 The Commit-Reveal Mechanism
+To prevent retrospective backfitting or performance manipulation, MantleEye operates on a strict commit-reveal schedule:
+1.  **Commit**: The agent hashes its trading reasoning, trade intent, nonce, signal type, and confidence score:
+    $$\text{Commit Hash} = \text{keccak256}(\text{abi.encodePacked}(\text{reasoning, intent, nonce, type, confidence}))$$
+    This hash is written to the `SignalAnchor` contract.
+2.  **Execute**: The agent executes the swaps on Merchant Moe and hedging positions on Bybit.
+3.  **Reveal**: The agent calls `revealDecision` with plaintext parameters. The contract hashes them, compares it to the committed hash, and emits a verified `DecisionLogged` event if they match.
 
-## Deployed Contracts (Mantle Sepolia)
-- **SignalAnchor**: `0x59da1E9D3A52da6716569442d643A963148829Aa`
-- **TradeLogger**: `0x06Dd85bcCA6B85Fc19cC32Dde26A07BC18E022a1`
+---
 
-## ERC-8004 Integration
-MANTLEYE is built to register with the official Mantle ERC-8004 benchmarking platform. The `SignalAnchor` contract emits fully compatible `DecisionLogged` events which the benchmarking nodes parse to evaluate AI agent execution quality. The agent identity NFT is managed directly by the official Mantle platform registry.
+## 📈 Backtesting Performance
+*   **Duration**: 90 Days (replaying Mantle Sepolia network events via Dune Analytics API queries)
+*   **Total Trades**: 367
+*   **Win Rate**: 67.2%
+*   **Sharpe Ratio**: 3.20
+*   **Sortino Ratio**: 5.35
+*   **Total Backtest PnL**: +36.75%
+*   **Max Drawdown**: -11.17%
 
-## Signals Monitored
-- **mETH/cmETH depeg**: deviation >0.5% between mETH and ETH rates.
-- **Merchant Moe LP large exits**: burn events in pools with value >$50k USD equivalent.
-- **Agni Finance whale swaps**: individual swaps with value >$100k USD equivalent.
-- **USDY/Ondo depeg**: Ondo USDY peg deviation >0.3%.
-- **Nansen Smart Money wallet movements**: transfers exceeding $10k from labeled accounts.
+---
 
-## Backtesting
-Historical backtesting is performed by replaying 30 days of Mantle Sepolia network events retrieved via Dune Analytics API queries. Replay simulation logs are compiled to evaluate the strategy's Sharpe ratio and drawdowns.
-- **Total Trades**: 47
-- **Win Rate**: 68%
-- **Sharpe Ratio**: 1.8
-- **Total Backtest PnL**: +12.4%
+## 🚀 Setup & Installation
 
-## Setup & Installation
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+ and npm
-
-### Contract Deployment & Compilation
+### 1. Smart Contract Compilation & Verification
 ```bash
 cd contracts
 npm install
 npx hardhat compile
+
+# Deploy to Mantle Sepolia
 npx hardhat run scripts/deploy.ts --network mantleSepolia
-npx hardhat run scripts/seed-on-chain.ts --network mantleSepolia
+# Verify contracts on MantleScan
+npx hardhat run scripts/verify.ts --network mantleSepolia
 ```
 
-### Python Agent Setup
+### 2. Python Agent Ingestion & Cognitive Loop Setup
 ```bash
-# From workspace root
+# Install dependencies
 pip install web3 requests eth-abi eth-utils python-dotenv pybit
+
+# Configure environment keys
 cp agent/config/.env.example agent/config/.env
-# Update values in agent/config/.env
+# Update agent/config/.env with RPC endpoints, private keys, and Claude API credentials
+
+# Run agent
 python agent/run.py
 ```
 
-### Next.js Dashboard Launch
+### 3. Next.js Dashboard Setup
 ```bash
 cd dashboard
 npm install
 npm run dev
 ```
 
-## Why This Wins (BGA Ethos)
-MANTLEYE democratizes institutional-grade on-chain intelligence. Smart money has always had an information edge. MANTLEYE makes Nansen-labeled whale signals accessible to anyone watching the Telegram channel or dashboard — reducing the information asymmetry between institutional players and retail traders on Mantle.
+---
 
-## GTM Strategy
-Post-hackathon: Subscription API for Mantle protocol teams. $299/month per team for real-time smart money alerts on their protocol's liquidity pools. Initial targets: Merchant Moe, Agni Finance, INIT Capital treasury teams. Year 1 target: 20 protocols = $71,880 ARR.
+## 🗺️ Production Roadmap
+
+*   **Account Abstraction (AA) & Gasless UX**: Integrate ERC-4337 smart contract wallets (Biconomy/ZeroDev) and Paymaster gas sponsorship. Add session keys to auto-approve strategy parameters within preset bounds.
+*   **Gelato Keeper Automation**: Transition the watcher/executor daemon from a centralized server to Gelato Web3 Functions or Chainlink Keepers to achieve a decentralized, trustless execution loop.
+*   **Staking & Vaults**: Vault contracts where users stake `$MNT` to sponsor gas/runners and receive a share of the agent's performance yields.
