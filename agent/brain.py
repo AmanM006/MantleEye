@@ -133,7 +133,7 @@ class MantleBrain:
                 logger.error(f"Gemini API execution failed: {e}")
 
         # 2. Try Claude if configured
-        if anthropic and self.anthropic_key and self.anthropic_key != "your_key" and not self.anthropic_key.startswith("your_":
+        if anthropic and self.anthropic_key and self.anthropic_key != "your_key" and not self.anthropic_key.startswith("your_"):
             try:
                 client = anthropic.Anthropic(api_key=self.anthropic_key)
                 prompt = (
