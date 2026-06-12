@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as fs from 'fs'
 import * as path from 'path'
 
+// Global in-memory cache to prevent double-notifications in serverless/read-only environments
+const notifiedCache = new Set<string>()
+
 const signalsJsonPath = path.join(process.cwd(), 'src', 'data', 'signals.json')
 const stateJsonPath = path.join(process.cwd(), 'src', 'data', 'agent_state.json')
 
@@ -159,7 +162,11 @@ export async function GET(req: NextRequest) {
           status: "revealed"
         }
       ]
-      fs.writeFileSync(signalsJsonPath, JSON.stringify(cachedSignals, null, 2))
+      try {
+        fs.writeFileSync(signalsJsonPath, JSON.stringify(cachedSignals, null, 2))
+      } catch (err) {
+        console.warn('Failed to seed default signals on disk (expected on Vercel):', err)
+      }
     }
 
     // Check if the user's agent is ACTIVE, and inject dynamic simulation signals
@@ -178,6 +185,9 @@ export async function GET(req: NextRequest) {
             const newNotifiedNonces: string[] = []
             const notifiedNonces = userState.notified_signals || []
             
+            // Seed global cache on load
+            notifiedNonces.forEach((n: string) => notifiedCache.add(n))
+            
             if (elapsed >= 30) {
               const sig = {
                 commitHash: "0xaa17d308f6089d43a9392603508d64c09b29aa1bf7f897748a773828b9cb83303",
@@ -195,8 +205,9 @@ export async function GET(req: NextRequest) {
                 status: "revealed"
               }
               dynamicSignals.push(sig)
-              if (!notifiedNonces.includes(sig.nonce)) {
+              if (!notifiedCache.has(sig.nonce)) {
                 newNotifiedNonces.push(sig.nonce)
+                notifiedCache.add(sig.nonce)
                 triggerTelegramAlert(sig)
               }
             }
@@ -217,8 +228,9 @@ export async function GET(req: NextRequest) {
                 status: "revealed"
               }
               dynamicSignals.push(sig)
-              if (!notifiedNonces.includes(sig.nonce)) {
+              if (!notifiedCache.has(sig.nonce)) {
                 newNotifiedNonces.push(sig.nonce)
+                notifiedCache.add(sig.nonce)
                 triggerTelegramAlert(sig)
               }
             }
@@ -239,15 +251,78 @@ export async function GET(req: NextRequest) {
                 status: "revealed"
               }
               dynamicSignals.push(sig)
-              if (!notifiedNonces.includes(sig.nonce)) {
+              if (!notifiedCache.has(sig.nonce)) {
                 newNotifiedNonces.push(sig.nonce)
+                notifiedCache.add(sig.nonce)
                 triggerTelegramAlert(sig)
+              }
+            }
+
+            // Cycle-based continuous signals (every 5 minutes / 300 seconds after the initial 90s run)
+            const cycleSeconds = 300
+            if (elapsed >= 90) {
+              const elapsedSince90 = elapsed - 90
+              const cyclesCount = Math.floor(elapsedSince90 / cycleSeconds)
+              
+              // Generate up to 10 latest cycles to keep the list populated
+              const startCycle = Math.max(1, cyclesCount - 10)
+              for (let i = startCycle; i <= cyclesCount; i++) {
+                const nonce = (88880 + i).toString()
+                
+                let signalType = 'accumulation'
+                let confidence = 85 + (i % 10)
+                let reasoning = 'Nansen Smart Money wallet transfer detected. Whales moving MNT from CEX to DEX pools.'
+                let tradeIntent = 'BUY MNT ON MERCHANT MOE'
+                let asset = 'MNT'
+                let commitHash = `0xac3b53642628afcc661d45e9d3def096010c4ae45a63ed389f0226bf66a72${nonce}`
+                let commitTx = `0xe1747ebb95b19b51ef1ebb90e940ac761fd60e39c9d5d5123864fe80f025f${nonce}`
+                let revealTx = `0x8f7868e5160c319d967583e0acd8abe614ab76da4880b67f3d7b20785f9dd9b${nonce}`
+                let onChainTx = `0x17d308f60893d43a9392603508d64c09b29aa1bf7f897748a773828b9cb8330${nonce}`
+                
+                if (i % 3 === 1) {
+                  signalType = 'depeg'
+                  reasoning = 'mETH/cmETH peg deviation detected at 0.52%. Initializing rebalance swap.'
+                  tradeIntent = 'SWAP mETH FOR cmETH ON MERCHANT MOE'
+                  asset = 'mETH'
+                } else if (i % 3 === 2) {
+                  signalType = 'whaleExit'
+                  reasoning = 'Large concentrated liquidity burn of 300,000 USDY detected. Hedging spot position.'
+                  tradeIntent = 'SHORT HEDGE USDYUSDT BYBIT'
+                  asset = 'USDY'
+                }
+                
+                const sig = {
+                  commitHash,
+                  signalType,
+                  confidence,
+                  reasoning,
+                  tradeIntent,
+                  nonce,
+                  timestamp: Math.floor(activationTime / 1000) + 90 + (i * cycleSeconds),
+                  commitTx,
+                  revealTx,
+                  onChainTx,
+                  bybitOrderId: `bybit_order_${nonce}`,
+                  nansenLabel: i % 2 === 0 ? 'Nansen: Smart Money Inflow' : 'Nansen: Arbitrageur',
+                  status: 'revealed'
+                }
+                
+                dynamicSignals.push(sig)
+                if (!notifiedCache.has(sig.nonce)) {
+                  newNotifiedNonces.push(sig.nonce)
+                  notifiedCache.add(sig.nonce)
+                  triggerTelegramAlert(sig)
+                }
               }
             }
 
             if (newNotifiedNonces.length > 0) {
               userState.notified_signals = [...notifiedNonces, ...newNotifiedNonces]
-              fs.writeFileSync(stateJsonPath, JSON.stringify(allStates, null, 2))
+              try {
+                fs.writeFileSync(stateJsonPath, JSON.stringify(allStates, null, 2))
+              } catch (writeErr) {
+                console.warn('Failed to save state on disk (expected on Vercel):', writeErr)
+              }
             }
             
             // Prepend new active signals to the signals list
